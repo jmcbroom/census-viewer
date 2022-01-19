@@ -2,8 +2,8 @@ import { faStreetView } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import bearing from "@turf/bearing";
 import { SimpleMarker, Viewer } from "mapillary-js";
-import { useEffect, useState } from "react";
 import moment from "moment";
+import { useEffect, useState } from "react";
 
 /**
  * Wrap a value on the interval [min, max].
