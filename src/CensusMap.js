@@ -1,6 +1,7 @@
 import bbox from "@turf/bbox";
 import _ from 'lodash';
-import maplibregl from "maplibre-gl";
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import maplibregl from "!maplibre-gl";
 import React, { useEffect, useState } from "react";
 import { baseStyle } from './styles/mapstyle';
 import videoIcon from './video.png';
