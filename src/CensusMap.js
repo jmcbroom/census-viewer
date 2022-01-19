@@ -1,10 +1,9 @@
 import bbox from "@turf/bbox";
-import centroid from "@turf/centroid";
+import _ from 'lodash';
 import maplibregl from "maplibre-gl";
 import React, { useEffect, useState } from "react";
 import { baseStyle } from './styles/mapstyle';
-import _ from 'lodash'
-import videoIcon from './video.png'
+import videoIcon from './video.png';
 
 const CensusMap = ({ blockData, setStreets, images, setImages, streetId, setStreetId, imageId, svBearing }) => {
 
@@ -80,7 +79,7 @@ const CensusMap = ({ blockData, setStreets, images, setImages, streetId, setStre
       }
     })
 
-  }, []);
+  }, [setStreets, setImages]);
 
   useEffect(() => {
     if(theMap && blockData) {
@@ -102,13 +101,13 @@ const CensusMap = ({ blockData, setStreets, images, setImages, streetId, setStre
       theMap.setFilter('mapillary-images-highlight', ["==", "id", parseInt(imageId)])
       theMap.setFilter('mapillary-location', ["==", "id", parseInt(imageId)])
     }
-  }, [imageId])
+  }, [imageId, theMap])
 
   useEffect(() => {
     if (theMap && imageId) {
       theMap.setLayoutProperty('mapillary-location', 'icon-rotate', (svBearing - 90))
     }
-  }, [svBearing])
+  }, [svBearing, theMap])
 
   return (
     <div id="map" className="my-4 h-96" />
