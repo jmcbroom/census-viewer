@@ -101,9 +101,14 @@ const CensusMap = ({ blockData, setStreets, images, setImages, streetId, setStre
     if (theMap && imageId) {
       theMap.setFilter('mapillary-images-highlight', ["==", "id", parseInt(imageId)])
       theMap.setFilter('mapillary-location', ["==", "id", parseInt(imageId)])
+    }
+  }, [imageId])
+
+  useEffect(() => {
+    if (theMap && imageId) {
       theMap.setLayoutProperty('mapillary-location', 'icon-rotate', (svBearing - 90))
     }
-  }, [imageId, svBearing])
+  }, [svBearing])
 
   return (
     <div id="map" className="my-4 h-96" />

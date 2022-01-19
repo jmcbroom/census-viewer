@@ -1,18 +1,14 @@
-import { Viewer, SimpleMarker } from "mapillary-js";
+import { faStreetView } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import bearing from "@turf/bearing";
+import { SimpleMarker, Viewer } from "mapillary-js";
 import { useEffect, useState } from "react";
 import moment from "moment";
-import { arcgisToGeoJSON } from '@esri/arcgis-to-geojson-utils';
-import centroid from '@turf/centroid';
-import bearing from "@turf/bearing";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStreetView } from "@fortawesome/free-solid-svg-icons";
-import _ from 'lodash'
-import distance from "@turf/distance";
 
 /**
  * Wrap a value on the interval [min, max].
  */
- function wrap(value, min, max) {
+function wrap(value, min, max) {
   var interval = max - min;
 
   while (value > max || value < min) {
@@ -78,16 +74,16 @@ let markerStyle = {
 const MapillarySv = ({ imageId, setImageId, setSvBearing, feature }) => {
 
   let [streetview, setStreetview] = useState(null)
+  let [capturedAt, setCapturedAt] = useState(null)
 
   useEffect(() => {
-  
+
     const viewer = new Viewer({
       accessToken: 'MLY|4690399437648324|de87555bb6015affa20c3df794ebab15',
       container: 'mly-viewer',
       component: {
         marker: true,
         bearing: false,
-        cover: true,
         attribution: false,
         sequence: false,
         cache: true,
@@ -100,7 +96,7 @@ const MapillarySv = ({ imageId, setImageId, setSvBearing, feature }) => {
 
     setStreetview(viewer)
 
-    if(feature) {
+    if (feature) {
       let coords = feature.geometry.coordinates
       console.log(coords)
       let defaultMarker = new SimpleMarker("default-id", { lat: coords[1], lng: coords[0] }, markerStyle);
@@ -108,22 +104,21 @@ const MapillarySv = ({ imageId, setImageId, setSvBearing, feature }) => {
       markerComponent.add([defaultMarker]);
     }
 
-    viewer.on("image", function(e) { 
-      if (imageId !== e.image.id) {
-        setImageId(e.image.id)
-      }
+    viewer.on("image", function (e) {
+      setImageId(e.image.id)
+      setCapturedAt(e.image._spatial.captured_at)
       e.target.getBearing()
         .then(d => setSvBearing(d))
     });
 
-    viewer.on("pov", function(e) {  
-      e.target.getBearing()
-        .then(d => setSvBearing(d))
+    viewer.on("bearing", function (e) {
+      console.log(e.bearing)
+      setSvBearing(e.bearing)
     });
   }, [])
 
   useEffect(() => {
-    if(streetview && imageId) {
+    if (streetview && imageId) {
       streetview.moveTo(imageId)
     }
   }, [imageId])
@@ -143,13 +138,13 @@ const MapillarySv = ({ imageId, setImageId, setSvBearing, feature }) => {
 
   return (
     <div>
-    <h2 className="text-lg bg-gray-200 p-2 flex items-center justify-between">
-      <span><FontAwesomeIcon icon={faStreetView} className="mr-2" />Street view</span>
-      {/* <span className="font-normal">{moment(svImageKey.captured_at).format("ll")}</span> */}
-    </h2>
-    <section className="sidebar-section street-view">
-    <div id="mly-viewer" style={{height: 300, width: '100%'}}/>
-    </section>
+      <h2 className="text-lg bg-gray-200 p-2 flex items-center justify-between">
+        <span><FontAwesomeIcon icon={faStreetView} className="mr-2" />Street view</span>
+        {capturedAt && <span className="font-normal">{moment(capturedAt).format("ll")}</span>}
+      </h2>
+      <section className="sidebar-section street-view">
+        <div id="mly-viewer" style={{ height: 300, width: '100%' }} />
+      </section>
     </div>
   )
 }

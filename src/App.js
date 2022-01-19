@@ -1,11 +1,10 @@
-import logo from './logo.svg';
-import {useParams, useSearchParams} from 'react-router-dom';
-import CensusMap from './CensusMap';
-import { useEffect, useState } from 'react';
-import {queryFeatures} from '@esri/arcgis-rest-feature-layer'
-import StreetPicker from './StreetPicker';
+import { queryFeatures } from '@esri/arcgis-rest-feature-layer';
 import centroid from '@turf/centroid';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import CensusMap from './CensusMap';
 import MapillarySv from './MapillarySv';
+import StreetPicker from './StreetPicker';
 
 const App = () => {
 
@@ -43,9 +42,10 @@ const App = () => {
         <span className="font-medium py-2 mr-4">Current census block:</span>
         <input type="text" className="p-2 bg-gray-100" value={block} onChange={(e) => setBlock(e.target.value)} />
       </div>
-      <CensusMap {...{blockData, setStreets, setImages, streetId, setStreetId, svBearing, imageId}}/>
-      <div className="grid grid-cols-2 gap-4"> 
-      {images && <StreetPicker {...{streets, streetId, setStreetId, blockCentroid, images, setImageId}} />}
+      {blockData && <CensusMap {...{blockData, setStreets, setImages, streetId, setStreetId, svBearing, imageId}}/>}
+      <div className="grid grid-cols-2 gap-4">
+      {images.length === 0 && <h2>Loading image data...</h2>}
+      {images.length > 0 && <StreetPicker {...{streets, streetId, setStreetId, blockCentroid, images, setImageId}} />}
       {imageId && <MapillarySv {...{imageId, setImageId, svBearing, setSvBearing}} /> }
       </div>
     </div>

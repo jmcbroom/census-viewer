@@ -27,6 +27,7 @@ const StreetPicker = ({ streets, streetId, setStreetId, blockCentroid, images, s
       <ul>
         {orderedStreets.slice(0, 6).map(str => (
           <li 
+            key={str.properties.street_id}
             className={str.properties.street_id === streetId ? "font-bold" : "font-normal"}
             onClick={() => setStreetId(str.properties.street_id)}>
               {str.properties.street_id} ({str.properties.streetname_id})
