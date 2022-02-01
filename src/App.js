@@ -13,9 +13,9 @@ const App = () => {
   let [blockData, setBlockData] = useState(null)
   let [streets, setStreets] = useState([])
   let [images, setImages] = useState([])
-
+  
   let [streetId, setStreetId] = useState(null)
-  let [imageId, setImageId] = useState(null)
+  let [image, setImage] = useState(null)
   let [svBearing, setSvBearing] = useState(null)
 
   let blockCentroid = blockData ? centroid(blockData) : null
@@ -42,11 +42,11 @@ const App = () => {
         <span className="font-medium py-2 mr-4">Current census block:</span>
         <input type="text" className="p-2 bg-gray-100" value={block} onChange={(e) => setBlock(e.target.value)} />
       </div>
-      {blockData && <CensusMap {...{blockData, setStreets, setImages, streetId, setStreetId, svBearing, imageId}}/>}
+      {blockData && <CensusMap {...{blockData, setStreets, setImages, streetId, setStreetId, svBearing, image}}/>}
       <div className="grid grid-cols-2 gap-4">
       {images.length === 0 && <h2>Loading image data...</h2>}
-      {images.length > 0 && <StreetPicker {...{streets, streetId, setStreetId, blockCentroid, images, setImageId}} />}
-      {imageId && <MapillarySv {...{imageId, setImageId, svBearing, setSvBearing}} /> }
+      {images.length > 0 && <StreetPicker {...{streets, streetId, setStreetId, blockCentroid, images, image, setImage}} />}
+      {image && <MapillarySv {...{setImage, svBearing, setSvBearing, images, image}} feature={centroid(blockData.features[0])} /> }
       </div>
     </div>
   );

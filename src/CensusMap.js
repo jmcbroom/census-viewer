@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { baseStyle } from './styles/mapstyle';
 import videoIcon from './video.png';
 
-const CensusMap = ({ blockData, setStreets, images, setImages, streetId, setStreetId, imageId, svBearing }) => {
+const CensusMap = ({ blockData, setStreets, images, setImages, streetId, setStreetId, image, svBearing }) => {
 
   const [theMap, setTheMap] = useState(null);
 
@@ -98,14 +98,14 @@ const CensusMap = ({ blockData, setStreets, images, setImages, streetId, setStre
   }, [streetId, theMap])
 
   useEffect(() => {
-    if (theMap && imageId) {
-      theMap.setFilter('mapillary-images-highlight', ["==", "id", parseInt(imageId)])
-      theMap.setFilter('mapillary-location', ["==", "id", parseInt(imageId)])
+    if (theMap && image) {
+      theMap.setFilter('mapillary-images-highlight', ["==", "id", parseInt(image.properties.id)])
+      theMap.setFilter('mapillary-location', ["==", "id", parseInt(image.properties.id)])
     }
-  }, [imageId, theMap])
+  }, [image, theMap])
 
   useEffect(() => {
-    if (theMap && imageId) {
+    if (theMap && image) {
       theMap.setLayoutProperty('mapillary-location', 'icon-rotate', (svBearing - 90))
     }
   }, [svBearing, theMap])

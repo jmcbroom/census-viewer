@@ -1,6 +1,7 @@
 import { faStreetView } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import bearing from "@turf/bearing";
+import centroid from '@turf/centroid';
 import { SimpleMarker, Viewer } from "mapillary-js";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -46,8 +47,8 @@ function bearingToBasic(desiredBearing, nodeBearing) {
 /**
  * Function to set the mapillary viewer's center by computing bearing
  */
-function setBearing(node, mly, start, end) {
-  var nodeBearing = node.computedCompassAngle; // Computed node compass angle (equivalent
+function computeBearing(node, start, end) {
+  var nodeBearing = node.computedCompassAngle || node.properties.compass_angle; // Computed node compass angle (equivalent
   // to bearing) is used by mjs when placing
   // the node in 3D space.
 
@@ -57,8 +58,7 @@ function setBearing(node, mly, start, end) {
   var basicY = 0.45; // tilt slightly up
 
   var center = [basicX, basicY];
-
-  mly.setCenter(center);
+  return center
 }
 
 let markerStyle = {
@@ -71,13 +71,11 @@ let markerStyle = {
 };
 
 
-const MapillarySv = ({ imageId, setImageId, setSvBearing, feature }) => {
-
+const MapillarySv = ({ setImage, setSvBearing, feature, image }) => {
   let [streetview, setStreetview] = useState(null)
   let [capturedAt, setCapturedAt] = useState(null)
 
   useEffect(() => {
-
     const viewer = new Viewer({
       accessToken: 'MLY|4690399437648324|de87555bb6015affa20c3df794ebab15',
       container: 'mly-viewer',
@@ -89,52 +87,49 @@ const MapillarySv = ({ imageId, setImageId, setSvBearing, feature }) => {
         cache: true,
         direction: true
       },
-      imageId: imageId
+      imageId: image.properties.id
     });
 
     viewer.deactivateCover()
 
     setStreetview(viewer)
 
-    if (feature) {
-      let coords = feature.geometry.coordinates
-      console.log(coords)
-      let defaultMarker = new SimpleMarker("default-id", { lat: coords[1], lng: coords[0] }, markerStyle);
-      let markerComponent = viewer.getComponent("marker");
-      markerComponent.add([defaultMarker]);
-    }
-
     viewer.on("image", function (e) {
-      setImageId(e.image.id)
       setCapturedAt(e.image._spatial.captured_at)
-      e.target.getBearing()
-        .then(d => setSvBearing(d))
+      let imageCoords = image.geometry.coordinates
+      let blockCentroid = centroid(feature).geometry.coordinates
+      let center = computeBearing(e.image, imageCoords, blockCentroid)
+      viewer.getImage().then(i => {
+        console.log(i)
+        let imageCoords = i._core.geometry.coordinates ? i._core.geometry.coordinates : [i._core.geometry.lng, i._core.geometry.lat]
+        console.log(imageCoords)
+        let blockCentroid = centroid(feature).geometry.coordinates
+        let center = computeBearing(i, imageCoords, blockCentroid)
+        console.log(center)
+        viewer.setCenter(center)
+      })
+      e.target.getBearing().then(d => setSvBearing(d))
     });
 
     viewer.on("bearing", function (e) {
-      console.log(e.bearing)
       setSvBearing(e.bearing)
     });
   }, [])
-
+  
   useEffect(() => {
-    if (streetview && imageId) {
-      streetview.moveTo(imageId)
+    if (streetview && image) {
+      streetview.moveTo(image.properties.id)
+      streetview.getImage().then(i => {
+        console.log(i)
+        let imageCoords = i._core.geometry.coordinates ? i._core.geometry.coordinates : [i._core.geometry.lng, i._core.geometry.lat]
+        console.log(imageCoords)
+        let blockCentroid = centroid(feature).geometry.coordinates
+        let center = computeBearing(i, imageCoords, blockCentroid)
+        console.log(center)
+        streetview.setCenter(center)
+      })
     }
-  }, [imageId])
-
-  // useEffect(() => {
-  //   if(streetview) {
-  //     let coords = feature.geometry.coordinates
-  //     let defaultMarker = new SimpleMarker("default-id", { lat: coords[1], lng: coords[0] }, markerStyle);
-  //     let markerComponent = streetview.getComponent("marker");
-  //     markerComponent.add([defaultMarker]);
-
-  //     streetview.getImage().then(i => {
-  //       setBearing(i, streetview, [i.originalLngLat.lng, i.originalLngLat.lat], [coords[1], coords[0]]);
-  //     })
-  //   }
-  // }, [feature])
+  }, [image])
 
   return (
     <div>
